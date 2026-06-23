@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Creative Block Reading</title>
+  <meta name="description" content="Discover which creative pattern is active for you right now." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.quiz-root { min-height: 100vh; background: #FAFAF7; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; }
+.quiz-topbar { width: 100%; background: #FFFFFF; border-bottom: 1px solid #E5E0DA; position: sticky; top: 0; z-index: 20; }
+.topbar-inner { max-width: 860px; margin: 0 auto; padding: 0.85rem 1.5rem 0; display: flex; flex-direction: column; }
+.topbar-brand-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.quiz-logo { font-family: 'DM Serif Display', Georgia, serif; font-size: 0.9rem; color: #1E1C1A; }
+.topbar-step-counter { font-size: 0.7rem; color: #9B9390; font-weight: 500; letter-spacing: 0.04em; }
+.step-tracker { display: flex; align-items: flex-end; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+.step-tracker::-webkit-scrollbar { display: none; }
+.tracker-item { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; flex-shrink: 0; padding: 0 0.55rem 0.75rem; position: relative; min-width: 50px; }
+.tracker-item::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: transparent; transition: background 0.2s; }
+.tracker-item.done::after, .tracker-item.active::after { background: #5C4FA0; }
+.tracker-num { font-size: 0.65rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #E5E0DA; color: #9B9390; transition: background 0.2s, color 0.2s; }
+.tracker-item.done .tracker-num, .tracker-item.active .tracker-num { background: #5C4FA0; color: white; }
+.tracker-label { font-size: 0.58rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #9B9390; white-space: nowrap; transition: color 0.2s; }
+.tracker-item.done .tracker-label, .tracker-item.active .tracker-label { color: #5C4FA0; }
+.quiz-body { width: 100%; max-width: 660px; padding: 2.75rem 1.5rem 5rem; }
+.section-eyebrow { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #5C4FA0; margin-bottom: 0.3rem; }
+.step-heading { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.65rem; line-height: 1.25; color: #1E1C1A; margin-bottom: 0.5rem; }
+.step-description { font-size: 0.88rem; color: #6B6460; line-height: 1.7; margin-bottom: 1.75rem; font-style: italic; }
+.option-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2rem; }
+.option-btn { display: flex; align-items: flex-start; gap: 0.85rem; background: #FFFFFF; border: 1.5px solid #E5E0DA; border-radius: 12px; padding: 0.9rem 1.1rem; cursor: pointer; text-align: left; transition: border-color 0.15s, background 0.15s; width: 100%; }
+.option-btn:hover, .option-btn.selected { border-color: #5C4FA0; background: #EEE9FF; }
+.option-letter { font-size: 0.65rem; font-weight: 700; color: #6B6460; background: #E5E0DA; border-radius: 6px; width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 2px; transition: background 0.15s, color 0.15s; }
+.option-btn.selected .option-letter { background: #5C4FA0; color: white; }
+.option-text { font-size: 0.92rem; color: #1E1C1A; line-height: 1.6; }
+.icon-card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 2rem; }
+.icon-card { background: #FFFFFF; border: 1.5px solid #E5E0DA; border-radius: 14px; padding: 1.25rem 1rem; cursor: pointer; text-align: center; transition: border-color 0.15s, background 0.15s, transform 0.1s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.icon-card:hover { border-color: #5C4FA0; background: #EEE9FF; transform: translateY(-1px); }
+.icon-card.selected { border-color: #5C4FA0; background: #EEE9FF; }
+.icon-card-emoji { font-size: 2rem; line-height: 1; }
+.icon-card-title { font-size: 0.95rem; font-weight: 700; color: #1E1C1A; }
+.icon-card-subtitle { font-size: 0.78rem; color: #6B6460; line-height: 1.5; }
+.icon-card-grid .icon-card:last-child:nth-child(odd) { grid-column: 1 / -1; max-width: 280px; margin: 0 auto; width: 100%; }
+.nav-row { display: flex; align-items: center; justify-content: space-between; }
+.btn-primary { background: #1E1C1A; color: white; border: none; border-radius: 10px; padding: 0.8rem 1.75rem; font-size: 0.92rem; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+.btn-primary:disabled { opacity: 0.3; cursor: default; }
+.btn-primary:not(:disabled):hover { opacity: 0.82; }
+.btn-ghost { background: transparent; color: #6B6460; border: none; padding: 0.8rem 0; font-size: 0.88rem; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.btn-ghost:hover { color: #1E1C1A; }
+.welcome-card { background: #FFFFFF; border: 1px solid #E5E0DA; border-radius: 20px; padding: 2.75rem 2.25rem; text-align: center; }
+.welcome-meta { display: flex; align-items: center; justify-content: center; gap: 1.25rem; font-size: 0.75rem; color: #6B6460; margin: 1.25rem 0 1.75rem; flex-wrap: wrap; }
+.confirm-row { background: #FFFFFF; border: 1px solid #E5E0DA; border-radius: 10px; padding: 0.85rem 1.1rem; margin-bottom: 0.55rem; }
+.confirm-q-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: #9B9390; font-weight: 600; margin-bottom: 0.2rem; }
+.confirm-value { font-size: 0.88rem; color: #1E1C1A; line-height: 1.5; }
+.result-badge { border-radius: 16px; padding: 1.75rem 2rem; text-align: center; margin-bottom: 1.5rem; }
+.result-badge-emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+.result-badge-eyebrow { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.4rem; }
+.result-badge-name { font-family: 'DM Serif Display', Georgia, serif; font-size: 2rem; line-height: 1.15; margin-bottom: 0.35rem; }
+.result-badge-tagline { font-size: 0.88rem; opacity: 0.8; font-style: italic; }
+.result-breakdown { display: flex; gap: 0.4rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.breakdown-bar-wrap { flex: 1; min-width: 56px; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+.breakdown-bar-outer { width: 100%; height: 48px; background: #E5E0DA; border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden; }
+.breakdown-bar-inner { width: 100%; border-radius: 4px; transition: height 0.7s ease; }
+.breakdown-label { font-size: 0.58rem; font-weight: 600; color: #6B6460; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
+.segment-pill { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 100px; font-size: 0.72rem; font-weight: 600; margin-bottom: 1.5rem; }
+.result-section { margin-bottom: 1.4rem; }
+.result-section-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.45rem; }
+.result-section-body { font-size: 0.93rem; color: #6B6460; line-height: 1.8; }
+.result-section-body ul { padding-left: 1.1rem; }
+.result-section-body li { margin-bottom: 0.25rem; }
+.divider { border: none; border-top: 1px solid #E5E0DA; margin: 1.25rem 0; }
+.result-cta-box { border-radius: 16px; padding: 1.75rem; margin-top: 1.75rem; background: #1E1C1A; text-align: center; }
+.result-cta-title { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.35rem; color: white; margin-bottom: 0.5rem; }
+.result-cta-body { font-size: 0.88rem; color: rgba(255,255,255,0.68); line-height: 1.7; margin-bottom: 1.25rem; }
+.result-cta-btn { background: white; color: #1E1C1A; border: none; border-radius: 9px; padding: 0.8rem 1.75rem; font-size: 0.92rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; display: inline-block; }
+.result-cta-btn:hover { opacity: 0.9; }
+.shimmer-line { height: 13px; background: linear-gradient(90deg, #E5E0DA 25%, #ede8e1 50%, #E5E0DA 75%); background-size: 200% 100%; border-radius: 6px; animation: shimmer 1.4s infinite; margin-bottom: 0.65rem; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (max-width: 480px) { .icon-card-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script>
+  (function() {
+    var h = React.createElement;
+    var useState = React.useState;
+    var useEffect = React.useEffect;
+    var useRef = React.useRef;
+
+    var NAMED_STEPS = [
+      { id: "welcome", label: "Quiz" },
+      { id: "q1", label: "First" },
+      { id: "q2", label: "Begin" },
+      { id: "q3", label: "Voice" },
+      { id: "q4", label: "Gap" },
+      { id: "q5", label: "Others" },
+      { id: "q6", label: "Timeline" },
+      { id: "q7", label: "Needs" },
+      { id: "confirm", label: "Confirm" },
+      { id: "result", label: "Result" },
+    ];
+
+    var STEPS = [
+      { id: "welcome", type: "welcome" },
+      {
+        id: "q1", type: "single", step: 1, total: 7,
+        sectionLabel: "The First Signal",
+        label: "When you think about making art right now\u2026",
+        description: "Your first honest reaction is the most accurate data point. Don\u2019t overthink it \u2014 choose the one that lands closest.",
+        options: [
+          { id: "a", text: "An inner critic. A voice that says it\u2019s not good enough, I\u2019m not ready, I need to do it better.", pattern: "fight" },
+          { id: "b", text: "A sudden urge to do anything else \u2014 clean, scroll, stay busy. Anything but sit down with it.", pattern: "flight" },
+          { id: "c", text: "A kind of freeze. I want to create but I feel stuck, overwhelmed, and unable to begin.", pattern: "freeze" },
+          { id: "d", text: "Worry about what others will think \u2014 whether I\u2019ll disappoint someone or lose their approval.", pattern: "fawn" },
+          { id: "e", text: "Heaviness. Numbness. An absence of desire where the wanting used to be.", pattern: "collapse" },
+        ],
+      },
+      {
+        id: "q2", type: "single", step: 2, total: 7,
+        sectionLabel: "The Moment of Beginning",
+        label: "When you try to sit down and begin\u2026",
+        description: "Think about the last few times you tried to start. What actually happened in those moments?",
+        options: [
+          { id: "a", text: "I start and restart. Nothing feels right. I\u2019m too hard on myself to let anything be imperfect.", pattern: "fight" },
+          { id: "b", text: "I find reasons to delay \u2014 a chore, an errand, one more thing to do first.", pattern: "flight" },
+          { id: "c", text: "I open the sketchbook or file and just\u2026 sit there. I can\u2019t quite make the first move.", pattern: "freeze" },
+          { id: "d", text: "I think about who might see it and what they\u2019ll think. That thought stops me.", pattern: "fawn" },
+          { id: "e", text: "I don\u2019t really try. There\u2019s not enough drive left to get me to the starting point.", pattern: "collapse" },
+        ],
+      },
+      {
+        id: "q3", type: "single", step: 3, total: 7,
+        sectionLabel: "The Inner Voice",
+        label: "The voice inside your head when it comes to your art\u2026",
+        description: "We all have an internal narrator. Read each option slowly and notice which one produces a small flicker of recognition.",
+        options: [
+          { id: "a", text: "\u201cThis isn\u2019t good enough. You can do better. Why aren\u2019t you further along?\u201d", pattern: "fight" },
+          { id: "b", text: "\u201cI\u2019ll get to it later. I\u2019m just too busy right now. Maybe tomorrow.\u201d", pattern: "flight" },
+          { id: "c", text: "\u201cI don\u2019t even know where to start. What if I choose wrong? What if it goes badly?\u201d", pattern: "freeze" },
+          { id: "d", text: "\u201cWhat will people think? Will this let anyone down? Am I creating what I\u2019m supposed to?\u201d", pattern: "fawn" },
+          { id: "e", text: "\u201cI used to care about this. Now I\u2019m not sure I feel anything about it at all.\u201d", pattern: "collapse" },
+        ],
+      },
+      {
+        id: "q4", type: "single", step: 4, total: 7,
+        sectionLabel: "The Gap",
+        label: "When you go a long stretch without creating\u2026",
+        description: "Most burned-out artists have experienced an extended gap. What fills that space \u2014 or doesn\u2019t?",
+        options: [
+          { id: "a", text: "I get frustrated with myself. The self-criticism gets louder.", pattern: "fight" },
+          { id: "b", text: "I stay busy enough that I can almost not notice \u2014 until I do, and feel guilty.", pattern: "flight" },
+          { id: "c", text: "I feel frozen in it. The longer I wait, the harder it feels to come back.", pattern: "freeze" },
+          { id: "d", text: "I feel like I\u2019m letting people down \u2014 a teacher, a community, someone who believed in me.", pattern: "fawn" },
+          { id: "e", text: "Not much. There\u2019s a flatness. I notice the absence but I can\u2019t feel moved by it.", pattern: "collapse" },
+        ],
+      },
+      {
+        id: "q5", type: "single", step: 5, total: 7,
+        sectionLabel: "Other People's Opinions",
+        label: "Your relationship to other people\u2019s opinions of your work\u2026",
+        description: "External perception affects every artist differently. This isn\u2019t about whether you care \u2014 it\u2019s about how that caring shows up.",
+        options: [
+          { id: "a", text: "I\u2019m my own harshest critic \u2014 other people\u2019s opinions barely get a chance before mine does.", pattern: "fight" },
+          { id: "b", text: "I avoid sharing so I never have to find out what people think.", pattern: "flight" },
+          { id: "c", text: "The thought of sharing feels overwhelming. I\u2019m not sure I\u2019ll ever feel ready.", pattern: "freeze" },
+          { id: "d", text: "I create with an audience in mind. Their approval feels like the point.", pattern: "fawn" },
+          { id: "e", text: "I\u2019ve stopped thinking about it. I\u2019m not creating enough to share anything.", pattern: "collapse" },
+        ],
+      },
+      {
+        id: "q6", type: "single", step: 6, total: 7,
+        sectionLabel: "The Timeline",
+        label: "How long has this been your creative experience?",
+        description: "Duration matters. A pattern active for years has different roots than one that started recently.",
+        options: [
+          { id: "a", text: "A few weeks to a few months." },
+          { id: "b", text: "Around 6 months to a year." },
+          { id: "c", text: "Over a year \u2014 it\u2019s been building." },
+          { id: "d", text: "As long as I can remember. This feels like my default." },
+        ],
+      },
+      {
+        id: "q7", type: "icon_cards", step: 7, total: 7,
+        sectionLabel: "What You Need",
+        label: "What feels most true about what you need right now?",
+        description: "Pick the one that feels most alive for you right now. Clarity here makes your result dramatically more useful.",
+        options: [
+          { id: "a", emoji: "\uD83E\uDDD0", title: "Permission", subtitle: "Create without it being perfect or impressive.", pattern: "fight" },
+          { id: "b", emoji: "\uD83C\uDF3F", title: "Gentleness", subtitle: "A safe, low-pressure space to return to art slowly.", pattern: "flight" },
+          { id: "c", emoji: "\uD83E\uDD1D", title: "Guidance", subtitle: "Someone to help me take the first step and stay present.", pattern: "freeze" },
+          { id: "d", emoji: "\uD83D\uDD11", title: "Autonomy", subtitle: "Support to create for myself, not for anyone else's approval.", pattern: "fawn" },
+          { id: "e", emoji: "\u2728", title: "Reconnection", subtitle: "Something gentle to remind me why I loved making art.", pattern: "collapse" },
+        ],
+      },
+
+      { id: "confirm", type: "confirm" },
+      { id: "result", type: "result" },
+    ];
+
+    var PATTERN_META = {
+      fight:   { label: "Fight",   headline: "Creative Fight Response",   tagline: "Your inner critic is working overtime.",                              color: "#B85C3A", bg: "#FDF0EB", emoji: "\uD83D\uDD25" },
+      flight:  { label: "Flight",  headline: "Creative Flight Response",  tagline: "Avoidance is keeping you moving \u2014 away from the studio.",       color: "#7A6B3A", bg: "#FDF8EB", emoji: "\uD83C\uDF2C\uFE0F" },
+      freeze:  { label: "Freeze",  headline: "Creative Freeze Response",  tagline: "You want to create \u2014 but you\u2019re stuck at the starting line.", color: "#3A6B94", bg: "#EBF3FB", emoji: "\uD83E\uDDCA" },
+      fawn:    { label: "Fawn",    headline: "Creative Fawn Response",    tagline: "You\u2019re creating for everyone except yourself.",                  color: "#7A3A94", bg: "#F5EBFD", emoji: "\uD83C\uDF38" },
+      collapse:{ label: "Collapse",headline: "Creative Collapse Response",tagline: "Your system has gone quiet \u2014 and that\u2019s not failure.",      color: "#3A5E6B", bg: "#EBF6F8", emoji: "\uD83C\uDF0A" },
+    };
+
+    var MUTED = "#6B6460";
+    var BORDER = "#E5E0DA";
+
+    var SYSTEM_PROMPT = [
+      "You are a compassionate guide for burned-out artists. The five creative nervous system patterns you work with are: Fight, Flight, Freeze, Fawn, and Collapse.",
+      "",
+      "- Fight: perfectionism, inner critic, urgency, over-efforting, fear of not being good enough",
+      "- Flight: avoidance, busyness, procrastination, staying in motion to escape the discomfort of creating",
+      "- Freeze: paralysis, overwhelm, unable to begin, stuck at the starting line",
+      "- Fawn: creating for others approval, people-pleasing, losing touch with personal creative desire",
+      "- Collapse: shutdown, numbness, heaviness, disconnection from creative desire, flatness",
+      "",
+      "Based on the quiz answers, write a personalized result using this EXACT format and these EXACT headings:",
+      "",
+      "WHAT THIS MAY MEAN",
+      "[2-3 warm sentences explaining their pattern in plain language, reducing shame.]",
+      "",
+      "WHAT I AM NOTICING",
+      "- [specific signal from their answers]",
+      "- [specific signal from their answers]",
+      "- [specific signal from their answers]",
+      "",
+      "HOW THIS MAY BE AFFECTING YOUR CREATIVE PROCESS",
+      "[2 sentences about the practical lived impact on their art life.]",
+      "",
+      "WHAT YOUR SYSTEM MAY BE NEEDING MOST",
+      "[2 sentences about what kind of support or environment would help them return to creating.]",
+      "",
+      "A GENTLE REFRAME",
+      "[1-2 sentences that reduce shame and restore self-trust.]",
+      "",
+      "WHAT THIS PATTERN IS PROTECTING YOU FROM",
+      "[2-3 sentences reframing the block as an intelligent protective response. Frame this as wisdom not weakness.]",
+      "",
+      "A SMALL STEP YOU CAN TAKE TODAY",
+      "[1-2 sentences offering one very gentle low-pressure action. Not about output, about reconnection.]",
+      "",
+      "WHAT THIS DOES NOT MEAN",
+      "[2-3 sentences dispelling the most common shame-based misconception about their pattern.]",
+      "",
+      "A MESSAGE FOR THE HARD DAYS",
+      "[2-3 warm grounding sentences they can return to when things feel stuck.]",
+      "",
+      "Rules: warm, calm, non-shaming, artist-friendly. Never frame the artist as lazy, broken, or undisciplined. Frame patterns as protective. No clinical jargon. No extra headings, preamble, or sign-offs. Always include ALL nine sections in order.",
+    ].join("\n");
+
+    function scoreAnswers(answers) {
+      var counts = { fight: 0, flight: 0, freeze: 0, fawn: 0, collapse: 0 };
+      ["q1","q2","q3","q4","q5","q7"].forEach(function(qid) {
+        var found = STEPS.find(function(item) { return item.id === qid; });
+        if (!found) return;
+        var chosen = found.options.find(function(opt) { return opt.id === answers[qid]; });
+        if (chosen && chosen.pattern) counts[chosen.pattern]++;
+      });
+      var sorted = Object.entries(counts).sort(function(a, b) { return b[1] - a[1]; });
+      var topCount = sorted[0][1];
+      var topPatterns = sorted.filter(function(e) { return e[1] === topCount; }).map(function(e) { return e[0]; });
+      var pattern;
+      if (topPatterns.length === 1) {
+        pattern = topPatterns[0];
+      } else {
+        var q7found = STEPS.find(function(item) { return item.id === "q7"; });
+        var q7chosen = q7found ? q7found.options.find(function(opt) { return opt.id === answers.q7; }) : null;
+        pattern = (q7chosen && q7chosen.pattern && topPatterns.includes(q7chosen.pattern)) ? q7chosen.pattern : topPatterns[0];
+      }
+      var segment = "Mentorship for Consistency";
+      return { pattern: pattern, counts: counts, segment: segment, offerProgram: true };
+    }
+
+    function el(type, props) {
+      var children = Array.prototype.slice.call(arguments, 2);
+      return h.apply(null, [type, props].concat(children.map(function(c) {
+        return Array.isArray(c) ? c : c;
+      })));
+    }
+
+    function StepTracker(props) {
+      var currentId = props.currentId;
+      var currentIndex = NAMED_STEPS.findIndex(function(item) { return item.id === currentId; });
+      var ref = useRef(null);
+      useEffect(function() {
+        if (ref.current) {
+          var active = ref.current.querySelector(".tracker-item.active");
+          if (active) active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        }
+      }, [currentId]);
+      return h("div", { className: "step-tracker", ref: ref },
+        NAMED_STEPS.map(function(item, i) {
+          var state = i < currentIndex ? "done" : i === currentIndex ? "active" : "future";
+          return h("div", { key: item.id, className: "tracker-item " + state },
+            h("div", { className: "tracker-num" }, state === "done" ? "\u2713" : i + 1),
+            h("div", { className: "tracker-label" }, item.label)
+          );
+        })
+      );
+    }
+
+    function TopBar(props) {
+      var found = STEPS.find(function(item) { return item.id === props.currentStepId; });
+      var isQuestion = found && (found.type === "single" || found.type === "icon_cards");
+      return h("div", { className: "quiz-topbar" },
+        h("div", { className: "topbar-inner" },
+          h("div", { className: "topbar-brand-row" },
+            h("span", { className: "quiz-logo" }, "Your Creative Block Reading"),
+            isQuestion && h("span", { className: "topbar-step-counter" }, "Step " + props.currentStep + " of " + props.totalSteps)
+          ),
+          h(StepTracker, { currentId: props.currentStepId })
+        )
+      );
+    }
+
+    function WelcomeStep(props) {
+      return h("div", { className: "quiz-body" },
+        h("div", { className: "welcome-card" },
+          h("div", { className: "section-eyebrow", style: { marginBottom: "1.25rem" } }, "Nicole Lau"),
+          h("p", { style: { fontSize: "0.8rem", fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.6rem" } }, "Before we begin"),
+          h("h1", { className: "step-heading", style: { fontSize: "1.55rem", marginBottom: "1rem" } }, "Are you ready for your fully personalised Creative Block Reading?"),
+          h("p", { style: { fontSize: "0.95rem", color: MUTED, lineHeight: 1.8, marginBottom: "1.25rem" } }, "Answer a few honest questions and within moments you'll get your result \u2014 so you know exactly which creative pattern is active for you right now, and where to start to return to your art with less shame and more ease."),
+          h("div", { className: "welcome-meta" },
+            h("span", null, "\u2756 Eight quick steps"),
+            h("span", null, "\u2756 About 3 minutes"),
+            h("span", null, "\u2756 Your result is yours to keep")
+          ),
+          h("button", { className: "btn-primary", style: { width: "100%", padding: "1rem", fontSize: "1rem" }, onClick: props.onNext }, "Yes! I'm ready to get started \u2192"),
+          h("p", { style: { fontSize: "0.72rem", color: MUTED, marginTop: "1rem", lineHeight: 1.75 } }, "Your answers stay private. This quiz is not a clinical diagnosis \u2014 it's a supportive reflection to help you understand your creative pattern. Your result is shared only with you and is never sold or shared with third parties.")
+        )
+      );
+    }
+
+    function QuestionStep(props) {
+      var step = props.step;
+      var selected = props.answers[step.id];
+      return h("div", { className: "quiz-body" },
+        h("div", { className: "section-eyebrow" }, step.sectionLabel),
+        h("h2", { className: "step-heading" }, step.label),
+        h("p", { className: "step-description" }, step.description),
+        h("div", { className: "option-list" },
+          step.options.map(function(opt) {
+            return h("button", {
+              key: opt.id,
+              className: "option-btn" + (selected === opt.id ? " selected" : ""),
+              onClick: function() { props.setAnswer(step.id, opt.id); }
+            },
+              h("span", { className: "option-letter" }, opt.id.toUpperCase()),
+              h("span", { className: "option-text" }, opt.text)
+            );
+          })
+        ),
+        h("div", { className: "nav-row" },
+          h("button", { className: "btn-ghost", onClick: props.onBack }, "\u2190 Back"),
+          h("button", { className: "btn-primary", disabled: !selected, onClick: props.onNext }, "Continue \u2192")
+        )
+      );
+    }
+
+    function IconCardStep(props) {
+      var step = props.step;
+      var selected = props.answers[step.id];
+      return h("div", { className: "quiz-body" },
+        h("div", { className: "section-eyebrow" }, step.sectionLabel),
+        h("h2", { className: "step-heading" }, step.label),
+        h("p", { className: "step-description" }, step.description),
+        h("div", { className: "icon-card-grid" },
+          step.options.map(function(opt) {
+            return h("div", {
+              key: opt.id,
+              className: "icon-card" + (selected === opt.id ? " selected" : ""),
+              onClick: function() { props.setAnswer(step.id, opt.id); }
+            },
+              h("div", { className: "icon-card-emoji" }, opt.emoji),
+              h("div", { className: "icon-card-title" }, opt.title),
+              h("div", { className: "icon-card-subtitle" }, opt.subtitle)
+            );
+          })
+        ),
+        h("div", { className: "nav-row" },
+          h("button", { className: "btn-ghost", onClick: props.onBack }, "\u2190 Back"),
+          h("button", { className: "btn-primary", disabled: !selected, onClick: props.onNext }, "Continue \u2192")
+        )
+      );
+    }
+
+    function ConfirmStep(props) {
+      var qSteps = STEPS.filter(function(item) { return item.type === "single" || item.type === "icon_cards"; });
+      return h("div", { className: "quiz-body" },
+        h("div", { className: "section-eyebrow" }, "Almost there"),
+        h("h2", { className: "step-heading" }, "Before we reveal your pattern\u2026"),
+        h("p", { className: "step-description", style: { marginBottom: "1.5rem" } }, "Here's what you shared. Does this feel right?"),
+        qSteps.map(function(item) {
+          var opt = item.options.find(function(o) { return o.id === props.answers[item.id]; });
+          var display = opt ? (opt.title ? (opt.emoji + " " + opt.title + " \u2014 " + opt.subtitle) : opt.text) : "\u2014";
+          return h("div", { className: "confirm-row", key: item.id },
+            h("div", { className: "confirm-q-label" }, item.sectionLabel),
+            h("div", { className: "confirm-value" }, display)
+          );
+        }),
+        h("div", { style: { height: "1.5rem" } }),
+        h("div", { className: "nav-row" },
+          h("button", { className: "btn-ghost", onClick: props.onBack }, "\u2190 Go back"),
+          h("button", { className: "btn-primary", onClick: props.onSubmit }, "Yes \u2014 show my result \u2192")
+        )
+      );
+    }
+
+    function BreakdownChart(props) {
+      var counts = props.counts;
+      var topPattern = props.topPattern;
+      var max = Math.max.apply(null, Object.values(counts).concat([1]));
+      return h("div", null,
+        h("div", { style: { fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: MUTED, marginBottom: "0.6rem" } }, "Pattern Breakdown"),
+        h("div", { className: "result-breakdown" },
+          Object.entries(PATTERN_META).map(function(entry) {
+            var key = entry[0], meta = entry[1];
+            var val = counts[key] || 0;
+            var ht = max === 0 ? 0 : Math.max((val / max) * 100, val > 0 ? 15 : 0);
+            var isTop = key === topPattern;
+            return h("div", { key: key, className: "breakdown-bar-wrap" },
+              h("div", { className: "breakdown-bar-outer" },
+                h("div", { className: "breakdown-bar-inner", style: { height: ht + "%", background: isTop ? meta.color : BORDER } })
+              ),
+              h("span", { className: "breakdown-label", style: { color: isTop ? meta.color : MUTED } }, meta.emoji + " " + meta.label)
+            );
+          })
+        )
+      );
+    }
+
+    function ResultStep(props) {
+      var answers = props.answers;
+      var onReset = props.onReset;
+      var loadingState = useState(true);
+      var loading = loadingState[0], setLoading = loadingState[1];
+      var aiTextState = useState("");
+      var aiText = aiTextState[0], setAiText = aiTextState[1];
+      var ref = useRef(null);
+      var scrolled = useRef(false);
+
+      var scored = scoreAnswers(answers);
+      var pattern = scored.pattern;
+      var counts = scored.counts;
+      var segment = scored.segment;
+      var offerProgram = scored.offerProgram;
+      var meta = PATTERN_META[pattern];
+
+      useEffect(function() {
+        var qSteps = STEPS.filter(function(item) { return item.type === "single" || item.type === "icon_cards"; });
+        var summary = qSteps.map(function(item) {
+          var opt = item.options.find(function(o) { return o.id === answers[item.id]; });
+          var display = opt ? (opt.title ? (opt.title + ": " + opt.subtitle) : opt.text) : "no answer";
+          return item.sectionLabel + ": " + display;
+        }).join("\n");
+
+        fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: 2000,
+            system: SYSTEM_PROMPT,
+            messages: [{ role: "user", content: "Quiz answers:\n" + summary + "\n\nIdentified pattern: " + meta.headline + " (" + pattern + ")\nBest-fit path: " + segment + "\n\nPlease write the personalized result sections now." }],
+          }),
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var block = d.content && d.content.find(function(b) { return b.type === "text"; });
+          setAiText(block ? block.text : "");
+          setLoading(false);
+        })
+        .catch(function() { setAiText(""); setLoading(false); });
+      }, []);
+
+      useEffect(function() {
+        if (!loading && ref.current && !scrolled.current) {
+          scrolled.current = true;
+          setTimeout(function() { if (ref.current) ref.current.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
+        }
+      }, [loading]);
+
+      function parseSection(text, heading) {
+        if (!text) return "";
+        var lines = text.split("\n");
+        var inside = false;
+        var out = [];
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          if (line.trim().toUpperCase() === heading.toUpperCase()) { inside = true; continue; }
+          if (inside) {
+            if (line.trim().length > 4 && line.trim() === line.trim().toUpperCase() && /^[A-Z]/.test(line.trim())) break;
+            out.push(line);
+          }
+        }
+        return out.join("\n").trim();
+      }
+
+      var SECTIONS = [
+        { key: "WHAT THIS MAY MEAN", label: "What This May Mean", bullets: false },
+        { key: "WHAT I AM NOTICING", label: "What I'm Noticing", bullets: true },
+        { key: "HOW THIS MAY BE AFFECTING YOUR CREATIVE PROCESS", label: "How This May Be Affecting Your Creative Process", bullets: false },
+        { key: "WHAT YOUR SYSTEM MAY BE NEEDING MOST", label: "What Your System May Be Needing Most", bullets: false },
+        { key: "A GENTLE REFRAME", label: "A Gentle Reframe", bullets: false },
+        { key: "WHAT THIS PATTERN IS PROTECTING YOU FROM", label: "What This Pattern Is Protecting You From", bullets: false },
+        { key: "A SMALL STEP YOU CAN TAKE TODAY", label: "A Small Step You Can Take Today", bullets: false },
+        { key: "WHAT THIS DOES NOT MEAN", label: "What This Does Not Mean", bullets: false },
+        { key: "A MESSAGE FOR THE HARD DAYS", label: "A Message for the Hard Days", bullets: false },
+      ];
+
+      var resultSections = loading ? null : SECTIONS.map(function(sec) {
+        var content = parseSection(aiText, sec.key);
+        if (!content) return null;
+        var lines = content.split("\n").filter(function(l) { return l.trim(); });
+        return h("div", { key: sec.key, className: "result-section" },
+          h("div", { className: "result-section-label", style: { color: meta.color } }, sec.label),
+          h("div", { className: "result-section-body" },
+            sec.bullets
+              ? h("ul", null, lines.filter(function(l) { return l.startsWith("-"); }).map(function(l, i) { return h("li", { key: i }, l.replace(/^-\s*/, "")); }))
+              : h("p", null, content)
+          ),
+          h("hr", { className: "divider" })
+        );
+      });
+
+      var ctaBox = h("div", { className: "result-cta-box" },
+            h("div", { className: "result-cta-title" }, "The Art of Unblocking"),
+            h("p", { className: "result-cta-body" }, "For the first time ever, I’m teaching a small, select group of 20 students how to become creatively unblocked and move through burnout by understanding their nervous system design — so they can return to their creative practice with more consistency, safety, and self-trust."),
+            h("p", { className: "result-cta-body" }, "The Art of Unblocking is currently in beta, which means founding members join at a significantly lower rate than the full $99/month price. Each time the membership opens, the price moves closer to $99. This is the lowest it will ever be — and once these 20 spots are filled, it closes until the next round."),
+            h("p", { className: "result-cta-body" }, "If you’re ready for a gentler, nervous-system-led path back to your creativity,"),
+            h("a", { href: "https://www.nicolelau.ca/art-of-unblocking-membership", target: "_blank", rel: "noopener noreferrer", className: "result-cta-btn" }, "Join the waitlist here →")
+          );
+
+      return h("div", { className: "quiz-body", ref: ref },
+        h("div", { className: "section-eyebrow" }, "Your Result"),
+        h("h2", { className: "step-heading", style: { marginBottom: "1.5rem" } }, "Your creative pattern"),
+        h("div", { className: "result-badge", style: { background: meta.bg } },
+          h("div", { className: "result-badge-emoji" }, meta.emoji),
+          h("div", { className: "result-badge-eyebrow", style: { color: meta.color } }, "Active Pattern"),
+          h("div", { className: "result-badge-name", style: { color: meta.color } }, meta.headline),
+          h("div", { className: "result-badge-tagline", style: { color: meta.color } }, meta.tagline)
+        ),
+        h("div", null, h("span", { className: "segment-pill", style: { background: meta.bg, color: meta.color } }, "Best-Fit Path: " + segment)),
+        h(BreakdownChart, { counts: counts, topPattern: pattern }),
+        h("hr", { className: "divider" }),
+        loading
+          ? h("div", null,
+              h("p", { style: { fontSize: "0.82rem", color: MUTED, marginBottom: "1rem" } }, "Reading your answers and writing your reflection\u2026"),
+              [85,65,75,50,80,55,70,60].map(function(w, i) { return h("div", { key: i, className: "shimmer-line", style: { width: w + "%" } }); })
+            )
+          : h("div", null,
+              resultSections,
+              ctaBox,
+              h("div", { style: { textAlign: "center", marginTop: "2rem" } },
+                h("button", { className: "btn-ghost", onClick: onReset, style: { fontSize: "0.82rem" } }, "\u21A9 Start over")
+              )
+            )
+      );
+    }
+
+    function App() {
+      var stepIndexState = useState(0);
+      var stepIndex = stepIndexState[0], setStepIndex = stepIndexState[1];
+      var answersState = useState({});
+      var answers = answersState[0], setAnswers = answersState[1];
+
+      var step = STEPS[stepIndex];
+      var qStep = (step && (step.type === "single" || step.type === "icon_cards")) ? step : null;
+
+      function setAnswer(id, val) {
+        setAnswers(function(prev) {
+          var next = Object.assign({}, prev);
+          next[id] = val;
+          return next;
+        });
+      }
+      function next()  { setStepIndex(function(i) { return i + 1; }); window.scrollTo(0, 0); }
+      function back()  { setStepIndex(function(i) { return i - 1; }); window.scrollTo(0, 0); }
+      function reset() { setStepIndex(0); setAnswers({}); window.scrollTo(0, 0); }
+
+      return h("div", { className: "quiz-root" },
+        h(TopBar, { currentStepId: step.id, currentStep: qStep ? qStep.step : null, totalSteps: qStep ? qStep.total : null }),
+        step.type === "welcome"    ? h(WelcomeStep,   { onNext: next }) : null,
+        step.type === "single"     ? h(QuestionStep,  { step: step, answers: answers, setAnswer: setAnswer, onNext: next, onBack: back }) : null,
+        step.type === "icon_cards" ? h(IconCardStep,  { step: step, answers: answers, setAnswer: setAnswer, onNext: next, onBack: back }) : null,
+        step.type === "confirm"    ? h(ConfirmStep,   { answers: answers, onBack: back, onSubmit: next }) : null,
+        step.type === "result"     ? h(ResultStep,    { answers: answers, onReset: reset }) : null
+      );
+    }
+
+    var root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(h(App, null));
+  })();
+  </script>
+</body>
+</html>
